@@ -59,9 +59,9 @@ export default function HomeScreen() {
           source={require('@/assets/images/rahul copy.jpg')} 
           style={styles.logo}
         />
-        <TouchableOpacity style={styles.filterButton}>
+        {/* <TouchableOpacity style={styles.filterButton}>
           <Filter size={24} color="#3b82f6" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <View style={styles.userTypeSelector}>
