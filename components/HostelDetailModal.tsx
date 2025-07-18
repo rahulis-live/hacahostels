@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { X, MapPin, Star, Phone, Calendar, Users, Home } from 'lucide-react-native';
+import { X, MapPin, Star, Phone, Calendar, Users, Chrome as Home } from 'lucide-react-native';
 import { Hostel } from '@/types/hostel';
 
 interface HostelDetailModalProps {
