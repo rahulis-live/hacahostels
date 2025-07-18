@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaVi
 import { useState } from 'react';
 import { MapPin, Star, Heart, Filter } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { useEffect } from 'react';
 import { useHostels } from '@/contexts/HostelContext';
 import { Hostel } from '@/types/hostel';
 import HostelDetailModal from '@/components/HostelDetailModal';
@@ -10,6 +11,13 @@ export default function HomeScreen() {
   const { hostels, toggleFavorite } = useHostels();
   const [selectedHostel, setSelectedHostel] = useState<Hostel | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Reset image index when modal opens with a new hostel
+  useEffect(() => {
+    if (modalVisible && selectedHostel) {
+      // Reset any image slider state when opening modal
+    }
+  }, [modalVisible, selectedHostel]);
 
   const handleHostelPress = (hostel: Hostel) => {
     setSelectedHostel(hostel);

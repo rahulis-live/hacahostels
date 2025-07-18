@@ -6,6 +6,7 @@ export interface Hostel {
   rating: number;
   distance: string;
   image: string;
+  images?: string[];
   amenities: string[];
   type: 'boys' | 'girls' | 'coed';
   roomType: 'single' | 'sharing' | 'dormitory';

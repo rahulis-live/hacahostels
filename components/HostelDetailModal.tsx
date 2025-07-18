@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { X, MapPin, Star, Phone, Calendar, Users, Chrome as Home } from 'lucide-react-native';
+import { X, MapPin, Star, Phone, Calendar, Users, Chrome as Home, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Hostel } from '@/types/hostel';
+import { useState } from 'react';
 
 interface HostelDetailModalProps {
   hostel: Hostel | null;
@@ -11,7 +12,21 @@ interface HostelDetailModalProps {
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function HostelDetailModal({ hostel, visible, onClose }: HostelDetailModalProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   if (!hostel) return null;
+
+  // Create images array - if hostel has multiple images use them, otherwise use the main image
+  const images = hostel.images && hostel.images.length > 0 ? hostel.images : [hostel.image];
+  const hasMultipleImages = images.length > 1;
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -47,7 +62,40 @@ export default function HostelDetailModal({ hostel, visible, onClose }: HostelDe
         </View>
 
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          <Image source={{ uri: hostel.image }} style={styles.heroImage} />
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: images[currentImageIndex] }} style={styles.heroImage} />
+            
+            {hasMultipleImages && (
+              <>
+                <TouchableOpacity style={styles.prevButton} onPress={prevImage}>
+                  <ChevronLeft size={24} color="#ffffff" />
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.nextButton} onPress={nextImage}>
+                  <ChevronRight size={24} color="#ffffff" />
+                </TouchableOpacity>
+                
+                <View style={styles.imageIndicator}>
+                  <Text style={styles.imageCounter}>
+                    {currentImageIndex + 1} / {images.length}
+                  </Text>
+                </View>
+                
+                <View style={styles.dotsContainer}>
+                  {images.map((_, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.dot,
+                        index === currentImageIndex && styles.activeDot
+                      ]}
+                      onPress={() => setCurrentImageIndex(index)}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
+          </View>
           
           <View style={styles.content}>
             <View style={styles.titleSection}>
@@ -158,9 +206,66 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 250,
+  },
   heroImage: {
     width: '100%',
     height: 250,
+  },
+  prevButton: {
+    position: 'absolute',
+    left: 16,
+    top: '50%',
+    marginTop: -20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    padding: 8,
+    zIndex: 1,
+  },
+  nextButton: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    marginTop: -20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    padding: 8,
+    zIndex: 1,
+  },
+  imageIndicator: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  imageCounter: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  dotsContainer: {
+    position: 'absolute',
+    bottom: 16,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  activeDot: {
+    backgroundColor: '#ffffff',
   },
   content: {
     padding: 20,
