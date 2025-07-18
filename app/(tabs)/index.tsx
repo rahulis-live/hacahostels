@@ -4,15 +4,27 @@ import { MapPin, Star, Heart, Filter } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useHostels } from '@/contexts/HostelContext';
 import { Hostel } from '@/types/hostel';
+import HostelDetailModal from '@/components/HostelDetailModal';
 
 export default function HomeScreen() {
   const { hostels, toggleFavorite } = useHostels();
-  const [userType, setUserType] = useState<'seeker' | 'lister'>('seeker');
+  const [selectedHostel, setSelectedHostel] = useState<Hostel | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleHostelPress = (hostel: Hostel) => {
+    setSelectedHostel(hostel);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedHostel(null);
+  };
 
   const HostelCard = ({ hostel }: { hostel: Hostel }) => (
     <TouchableOpacity 
       style={styles.hostelCard}
-      onPress={() => router.push(`/hostel/${hostel.id}`)}
+      onPress={() => handleHostelPress(hostel)}
     >
       <Image source={{ uri: hostel.image }} style={styles.hostelImage} />
       <TouchableOpacity 
@@ -80,6 +92,12 @@ export default function HomeScreen() {
           ))}
         </View>
       </ScrollView>
+
+      <HostelDetailModal
+        hostel={selectedHostel}
+        visible={modalVisible}
+        onClose={closeModal}
+      />
     </SafeAreaView>
   );
 }
