@@ -55,17 +55,11 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Image 
-            source={require('@/assets/images/rahul copy.jpg')} 
-            style={styles.logo}
-          />
-          <View style={styles.headerText}>
-            <Text style={styles.welcomeText}>Welcome to</Text>
-            <Text style={styles.appTitle}>Haris Hostel Finder</Text>
-          </View>
-        </View>
-        /<TouchableOpacity style={styles.filterButton}>
+        <Image 
+          source={require('@/assets/images/rahul copy.jpg')} 
+          style={styles.logo}
+        />
+        <TouchableOpacity style={styles.filterButton}>
           <Filter size={24} color="#3b82f6" />
         </TouchableOpacity>
       </View>
@@ -127,23 +121,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-  },
-  headerText: {
-    flexDirection: 'column',
-  },
-  welcomeText: {
-    fontSize: 14,
-    color: '#6b7280',
-    fontWeight: '400',
-  },
-  appTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1f2937',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    position: 'absolute',
+    left: '50%',
+    marginLeft: -30,
   },
   filterButton: {
     padding: 8,
