@@ -65,7 +65,7 @@ export default function HomeScreen() {
             <Text style={styles.appTitle}>Haris Hostel Finder</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.filterButton}>
+        /<TouchableOpacity style={styles.filterButton}>
           <Filter size={24} color="#3b82f6" />
         </TouchableOpacity>
       </View>
