@@ -57,7 +57,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Image 
-            source={require('@/assets/images/rahul copy.jpg')} 
+            source={require('@/assets/images/rahul.png')} 
             style={styles.logo}
           />
         </View>
