@@ -55,31 +55,14 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Image 
-          source={require('@/assets/images/rahul copy.jpg')} 
-          style={styles.logo}
-        />
-        {/* <TouchableOpacity style={styles.filterButton}>
-          <Filter size={24} color="#3b82f6" />
-        </TouchableOpacity> */}
-      </View>
-
-      <View style={styles.userTypeSelector}>
-        <TouchableOpacity 
-          style={[styles.typeButton, userType === 'seeker' && styles.activeTypeButton]}
-          onPress={() => setUserType('seeker')}
-        >
-          <Text style={[styles.typeButtonText, userType === 'seeker' && styles.activeTypeButtonText]}>
-            Find Hostel
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.typeButton, userType === 'lister' && styles.activeTypeButton]}
-          onPress={() => setUserType('lister')}
-        >
-          <Text style={[styles.typeButtonText, userType === 'lister' && styles.activeTypeButtonText]}>
-            List Hostel
-          </Text>
+        <View style={styles.headerLeft}>
+          <Image 
+            source={require('@/assets/images/rahul copy.jpg')} 
+            style={styles.logo}
+          />
+        </View>
+        <TouchableOpacity style={styles.searchButton} onPress={() => router.push('/(tabs)/search')}>
+          <Text style={styles.searchButtonText}>Find Hostel</Text>
         </TouchableOpacity>
       </View>
 
@@ -116,45 +99,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
-  headerContent: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 50,
+    height: 50,
     borderRadius: 30,
-    position: 'absolute',
-    left: '50%',
-    marginLeft: -30,
   },
-  filterButton: {
-    padding: 8,
-    backgroundColor: '#f3f4f6',
-    borderRadius: 8,
-  },
-  userTypeSelector: {
-    flexDirection: 'row',
-    margin: 20,
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    padding: 4,
-  },
-  typeButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  activeTypeButton: {
+  searchButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     backgroundColor: '#3b82f6',
+    borderRadius: 8,
   },
-  typeButtonText: {
+  searchButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
-  },
-  activeTypeButtonText: {
     color: '#ffffff',
   },
   scrollView: {
