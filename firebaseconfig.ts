@@ -23,14 +23,4 @@ export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
 
-// Connect to auth emulator in development
-if (__DEV__) {
-  try {
-    connectAuthEmulator(auth, 'http://localhost:9099');
-  } catch (error) {
-    // Emulator already connected or not available
-    console.log('Auth emulator connection skipped:', error);
-  }
-}
-
 export const db = getFirestore(app);
