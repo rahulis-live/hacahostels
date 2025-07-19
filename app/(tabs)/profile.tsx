@@ -26,7 +26,7 @@ export default function ProfileScreen() {
   const { hostels, deleteHostel } = useHostels();
   const { user, signOut, isEmailVerified, sendEmailVerification } = useAuth();
   const userHostels = hostels.filter(h => h.ownerId === initialUser.id);
-  const [user, setUser] = useState<UserProfile>(initialUser);
+  const [localUser, setLocalUser] = useState<UserProfile>(initialUser);
   const [sendingVerification, setSendingVerification] = useState(false);
 
   const handleDelete = (id: string) => {
@@ -49,7 +49,7 @@ export default function ProfileScreen() {
       quality: 0.7,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setUser(prev => ({ ...prev, avatar: result.assets[0].uri }));
+      setLocalUser(prev => ({ ...prev, avatar: result.assets[0].uri }));
     }
   };
 
@@ -119,7 +119,7 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             )}
             <Text style={styles.avatarHint}>Tap photo to change</Text>
-          </View>
+          <Text style={styles.userName}>{localUser.name}</Text>
         </View>
 
         <View style={styles.section}>
@@ -131,12 +131,12 @@ export default function ProfileScreen() {
               <View key={hostel.id} style={styles.hostelCard}>
                 <Image source={{ uri: hostel.image }} style={styles.hostelImage} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.hostelName}>{hostel.name}</Text>
-                  <Text style={styles.hostelAddress}>{hostel.address}</Text>
+            {localUser.avatar ? (
+              <Image source={{ uri: localUser.avatar }} style={styles.avatarImg} />
                 </View>
                 <TouchableOpacity onPress={() => handleDelete(hostel.id)} style={styles.deleteBtn}>
                   <Trash2 size={20} color="#ef4444" />
-                </TouchableOpacity>
+                <Text style={styles.avatarText}>{localUser.name.split(' ').map(n => n[0]).join('')}</Text>
               </View>
             ))
           )}
