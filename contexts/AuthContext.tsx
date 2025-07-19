@@ -1,25 +1,26 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, User, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-import { auth } from '@/firebaseconfig';
+import {
+  onAuthStateChanged,
+  User,
+  signOut,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  sendEmailVerification as firebaseSendEmailVerification
+} from 'firebase/auth';
 import { Alert } from 'react-native';
+import { auth } from '@/firebaseconfig';
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signOut: () => Promise<void>;
+  logout: () => Promise<void>;
   updateUserPassword: (currentPassword: string, newPassword: string) => Promise<void>;
   isEmailVerified: boolean;
   sendEmailVerification: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  signOut: async () => {},
-  updateUserPassword: async () => {},
-  isEmailVerified: false,
-  sendEmailVerification: async () => {},
-});
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -29,26 +30,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      setIsEmailVerified(firebaseUser?.emailVerified || false);
+      setIsEmailVerified(firebaseUser?.emailVerified ?? false);
       setLoading(false);
-      
-      // Log authentication events for security monitoring
+
       if (firebaseUser) {
         console.log('User authenticated:', firebaseUser.uid);
       } else {
         console.log('User signed out');
       }
     });
+
     return unsubscribe;
   }, []);
 
-  const handleSignOut = async () => {
+  const logout = async () => {
     try {
       await signOut(auth);
       setUser(null);
       setIsEmailVerified(false);
     } catch (error: any) {
-      console.error('Sign out error:', error);
+      console.error('Logout error:', error);
       Alert.alert('Error', 'Failed to sign out. Please try again.');
       throw error;
     }
@@ -59,21 +60,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       throw new Error('No authenticated user found');
     }
 
-    // Validate new password strength
     if (newPassword.length < 8) {
       throw new Error('Password must be at least 8 characters long');
     }
 
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(newPassword)) {
-      throw new Error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+    const strongPasswordRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
+    if (!strongPasswordRegex.test(newPassword)) {
+      throw new Error('Password must contain uppercase, lowercase, number, and special character');
     }
 
     try {
-      // Re-authenticate user before password change
       const credential = EmailAuthProvider.credential(user.email, currentPassword);
       await reauthenticateWithCredential(user, credential);
-      
-      // Update password
       await updatePassword(user, newPassword);
     } catch (error: any) {
       console.error('Password update error:', error);
@@ -90,8 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const { sendEmailVerification: sendVerification } = await import('firebase/auth');
-      await sendVerification(user);
+      await firebaseSendEmailVerification(user);
     } catch (error: any) {
       console.error('Email verification error:', error);
       throw new Error('Failed to send verification email. Please try again.');
@@ -99,17 +96,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      loading,
-      signOut: handleSignOut,
-      updateUserPassword,
-      isEmailVerified,
-      sendEmailVerification,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        logout,
+        updateUserPassword,
+        isEmailVerified,
+        sendEmailVerification,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

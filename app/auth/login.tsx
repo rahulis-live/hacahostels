@@ -51,7 +51,8 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
-      
+      await userCredential.user.reload(); // 👈 Force refresh
+
       // Check if email is verified
       if (!userCredential.user.emailVerified) {
         Alert.alert(

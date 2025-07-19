@@ -1,58 +1,55 @@
-import { Slot, useRouter, useSegments } from 'expo-router';
-import { useEffect } from 'react';
+import { Slot } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { HostelProvider } from '@/contexts/HostelContext';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { useRouter, useSegments } from 'expo-router';
 
-function AuthGate({ children }: { children: React.ReactNode }) {
+function AuthGateWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <_AuthGate>{children}</_AuthGate>
+    </AuthProvider>
+  );
+}
+
+function _AuthGate({ children }: { children: React.ReactNode }) {
   const { user, loading, isEmailVerified } = useAuth();
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
-    if (loading) return; // Wait for auth state to load
+    if (loading) return;
 
     const inAuthGroup = segments[0] === 'auth';
-    const inTabsGroup = segments[0] === '(tabs)';
-
-    if (!user) {
-      // User is not authenticated, redirect to login
+    console.log("Segments:", segments);
+    console.log("User:", user);
+    console.log("Email Verified:", isEmailVerified);
+    
+    if (!user || !isEmailVerified) {
       if (!inAuthGroup) {
         router.replace('/auth/login');
       }
     } else {
-      // User is authenticated
-      if (!isEmailVerified) {
-        // Email not verified, keep them on auth screens or redirect to login
-        if (!inAuthGroup) {
-          router.replace('/auth/login');
-        }
-      } else {
-        // User is authenticated and verified, redirect to main app
-        if (inAuthGroup) {
-          router.replace('/(tabs)');
-        }
+      if (inAuthGroup) {
+        router.replace('/(tabs)');
       }
     }
   }, [user, loading, isEmailVerified, segments]);
 
-  // Show loading screen while determining auth state
-  if (loading) {
-    return null; // You could show a loading spinner here
-  }
+  if (loading) return null;
 
   return <>{children}</>;
 }
 
 export default function CustomLayout() {
   useFrameworkReady();
+
   return (
-    <AuthProvider>
-      <HostelProvider>
-        <AuthGate>
-          <Slot />
-        </AuthGate>
-      </HostelProvider>
-    </AuthProvider>
+    <HostelProvider>
+      <AuthGateWrapper>
+        <Slot />
+      </AuthGateWrapper>
+    </HostelProvider>
   );
 }
