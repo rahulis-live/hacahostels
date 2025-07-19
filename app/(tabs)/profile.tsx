@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, SafeAreaView } from 'react-native';
-import { LogOut, Trash2, HelpCircle, Shield, Camera, Key, Mail } from 'lucide-react-native';
+import { LogOut, Trash2, CircleHelp as HelpCircle, Shield, Camera, Key, Mail } from 'lucide-react-native';
 import { useHostels } from '@/contexts/HostelContext';
 import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
