@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  };
+  },
   contentContainer: {
     padding: 24,
     paddingTop: 60,
@@ -372,36 +372,4 @@ const styles = StyleSheet.create({
     color: '#3b82f6',
     textAlign: 'center',
   },
-});
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-      />
-      <Button title={loading ? "Signing up..." : "Sign Up"} onPress={handleSignup} disabled={loading} />
-      <TouchableOpacity onPress={() => router.replace('/auth/login')}>
-        <Text style={styles.link}>Already have an account? Login</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
-  title: { fontSize: 32, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 16 },
-  link: { color: '#3b82f6', marginTop: 16, textAlign: 'center' },
 });
