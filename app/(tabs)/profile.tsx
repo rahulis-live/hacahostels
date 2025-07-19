@@ -1,206 +1,120 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, SafeAreaView } from 'react-native';
+import { LogOut, Trash2, HelpCircle, Shield, Camera } from 'lucide-react-native';
+import { useHostels } from '@/contexts/HostelContext';
+import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { User, Settings, Bell, Shield, CircleHelp as HelpCircle, LogOut, CreditCard as Edit, Star, Eye, MessageSquare } from 'lucide-react-native';
+
+interface UserProfile {
+  id: string;
+  name: string;
+  avatar?: string;
+  studentId: string;
+  institute: string;
+}
+
+const initialUser: UserProfile = {
+  id: 'current-user',
+  name: 'John Smith',
+  avatar: undefined, // Add image URL if available
+  studentId: 'HC2024001',
+  institute: 'Haris and Co Institute',
+};
 
 export default function ProfileScreen() {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [locationEnabled, setLocationEnabled] = useState(true);
-  const [userType, setUserType] = useState<'seeker' | 'lister'>('seeker');
+  const { hostels, deleteHostel } = useHostels();
+  const userHostels = hostels.filter(h => h.ownerId === initialUser.id);
+  const [user, setUser] = useState<UserProfile>(initialUser);
 
-  const ProfileStat = ({ icon: Icon, label, value, color }: {
-    icon: any;
-    label: string;
-    value: string;
-    color: string;
-  }) => (
-    <View style={styles.statCard}>
-      <View style={[styles.statIcon, { backgroundColor: color }]}>
-        <Icon size={20} color="#ffffff" />
-      </View>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
+  const handleDelete = (id: string) => {
+    Alert.alert('Delete Listing', 'Are you sure you want to delete this listing?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteHostel(id) },
+    ]);
+  };
 
-  const MenuSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <View style={styles.menuSection}>
-      <Text style={styles.menuSectionTitle}>{title}</Text>
-      {children}
-    </View>
-  );
-
-  const MenuItem = ({ icon: Icon, label, onPress, showSwitch = false, switchValue, onSwitchToggle, rightText }: {
-    icon: any;
-    label: string;
-    onPress?: () => void;
-    showSwitch?: boolean;
-    switchValue?: boolean;
-    onSwitchToggle?: (value: boolean) => void;
-    rightText?: string;
-  }) => (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-      <View style={styles.menuItemLeft}>
-        <Icon size={20} color="#6b7280" />
-        <Text style={styles.menuItemLabel}>{label}</Text>
-      </View>
-      {showSwitch && (
-        <Switch
-          value={switchValue}
-          onValueChange={onSwitchToggle}
-          trackColor={{ false: '#f3f4f6', true: '#3b82f6' }}
-          thumbColor={switchValue ? '#ffffff' : '#ffffff'}
-        />
-      )}
-      {rightText && <Text style={styles.menuItemRight}>{rightText}</Text>}
-    </TouchableOpacity>
-  );
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Permission required', 'Permission to access media library is required!');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setUser(prev => ({ ...prev, avatar: result.assets[0].uri }));
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.profileSection}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>JS</Text>
+            <TouchableOpacity style={styles.avatarContainer} onPress={pickImage} activeOpacity={0.7}>
+              {user.avatar ? (
+                <Image source={{ uri: user.avatar }} style={styles.avatarImg} />
+              ) : (
+                <View style={styles.avatar}>
+                  <Camera size={28} color="#fff" style={{ position: 'absolute', alignSelf: 'center', top: 26 }} />
+                  <Text style={styles.avatarText}>{user.name.split(' ').map(n => n[0]).join('')}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <Text style={styles.userName}>{user.name}</Text>
+            <Text style={styles.userInfo}>Student ID: {user.studentId}</Text>
+            <Text style={styles.userInfo}>{user.institute}</Text>
+            <Text style={styles.avatarHint}>Tap photo to change</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Your Listings</Text>
+          {userHostels.length === 0 ? (
+            <Text style={styles.emptyText}>You have not listed any hostels yet.</Text>
+          ) : (
+            userHostels.map(hostel => (
+              <View key={hostel.id} style={styles.hostelCard}>
+                <Image source={{ uri: hostel.image }} style={styles.hostelImage} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.hostelName}>{hostel.name}</Text>
+                  <Text style={styles.hostelAddress}>{hostel.address}</Text>
+                </View>
+                <TouchableOpacity onPress={() => handleDelete(hostel.id)} style={styles.deleteBtn}>
+                  <Trash2 size={20} color="#ef4444" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.editButton}>
-                <Edit size={16} color="#3b82f6" />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.userName}>John Smith</Text>
-            <Text style={styles.userInfo}>Student ID: HC2024001</Text>
-            <Text style={styles.userInfo}>Haris and Co Institute</Text>
-          </View>
-
-          <View style={styles.userTypeSelector}>
-            <TouchableOpacity 
-              style={[styles.typeButton, userType === 'seeker' && styles.activeTypeButton]}
-              onPress={() => setUserType('seeker')}
-            >
-              <Text style={[styles.typeButtonText, userType === 'seeker' && styles.activeTypeButtonText]}>
-                Seeker
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.typeButton, userType === 'lister' && styles.activeTypeButton]}
-              onPress={() => setUserType('lister')}
-            >
-              <Text style={[styles.typeButtonText, userType === 'lister' && styles.activeTypeButtonText]}>
-                Lister
-              </Text>
-            </TouchableOpacity>
-          </View>
+            ))
+          )}
         </View>
 
-        <View style={styles.statsContainer}>
-          <ProfileStat
-            icon={Eye}
-            label="Profile Views"
-            value="24"
-            color="#3b82f6"
-          />
-          <ProfileStat
-            icon={MessageSquare}
-            label="Messages"
-            value="8"
-            color="#10b981"
-          />
-          <ProfileStat
-            icon={Star}
-            label="Favorites"
-            value="12"
-            color="#f59e0b"
-          />
-        </View>
-
-        <MenuSection title="Account Settings">
-          <MenuItem
-            icon={User}
-            label="Personal Information"
-            onPress={() => {}}
-          />
-          <MenuItem
-            icon={Shield}
-            label="Privacy & Security"
-            onPress={() => {}}
-          />
-          <MenuItem
-            icon={Bell}
-            label="Notifications"
-            showSwitch={true}
-            switchValue={notificationsEnabled}
-            onSwitchToggle={setNotificationsEnabled}
-          />
-          <MenuItem
-            icon={Settings}
-            label="Location Services"
-            showSwitch={true}
-            switchValue={locationEnabled}
-            onSwitchToggle={setLocationEnabled}
-          />
-        </MenuSection>
-
-        <MenuSection title="Preferences">
-          <MenuItem
-            icon={Settings}
-            label="Search Preferences"
-            onPress={() => {}}
-          />
-          <MenuItem
-            icon={Bell}
-            label="Notification Settings"
-            onPress={() => {}}
-          />
-          <MenuItem
-            icon={User}
-            label="Profile Visibility"
-            rightText="Public"
-            onPress={() => {}}
-          />
-        </MenuSection>
-
-        <MenuSection title="Support">
-          <MenuItem
-            icon={HelpCircle}
-            label="Help & Support"
-            onPress={() => {}}
-          />
-          <MenuItem
-            icon={MessageSquare}
-            label="Contact Us"
-            onPress={() => {}}
-          />
-          <MenuItem
-            icon={Star}
-            label="Rate App"
-            onPress={() => {}}
-          />
-        </MenuSection>
-
-        <MenuSection title="Legal">
-          <MenuItem
-            icon={Shield}
-            label="Terms of Service"
-            onPress={() => {}}
-          />
-          <MenuItem
-            icon={Shield}
-            label="Privacy Policy"
-            onPress={() => {}}
-          />
-        </MenuSection>
-
-        <View style={styles.logoutSection}>
-          <TouchableOpacity style={styles.logoutButton}>
+        <View style={styles.section}>
+          <TouchableOpacity style={styles.logoutButton} onPress={() => Alert.alert('Logged out!')}>
             <LogOut size={20} color="#ef4444" />
             <Text style={styles.logoutText}>Log Out</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.appInfo}>
-          <Text style={styles.appVersion}>Version 1.0.0</Text>
-          <Text style={styles.appCopyright}>© 2024 Haris Hostel Finder</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Support</Text>
+          <TouchableOpacity style={styles.menuItem}>
+            <HelpCircle size={20} color="#6b7280" />
+            <Text style={styles.menuItemLabel}>Help & Support</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Legal</Text>
+          <TouchableOpacity style={styles.menuItem}>
+            <Shield size={20} color="#6b7280" />
+            <Text style={styles.menuItemLabel}>Terms of Service</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem}>
+            <Shield size={20} color="#6b7280" />
+            <Text style={styles.menuItemLabel}>Privacy Policy</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -227,7 +141,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   avatarContainer: {
-    position: 'relative',
     marginBottom: 16,
   },
   avatar: {
@@ -237,24 +150,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#3b82f6',
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+  },
+  avatarImg: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   avatarText: {
     fontSize: 28,
     fontWeight: '600',
     color: '#ffffff',
+    zIndex: 1,
   },
-  editButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  avatarHint: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 4,
   },
   userName: {
     fontSize: 20,
@@ -267,112 +179,56 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginBottom: 2,
   },
-  userTypeSelector: {
-    flexDirection: 'row',
-    margin: 20,
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    padding: 4,
-  },
-  typeButton: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  activeTypeButton: {
-    backgroundColor: '#3b82f6',
-  },
-  typeButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6b7280',
-  },
-  activeTypeButtonText: {
-    color: '#ffffff',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-    textAlign: 'center',
-  },
-  menuSection: {
+  section: {
     backgroundColor: '#ffffff',
     marginVertical: 8,
     borderRadius: 12,
     marginHorizontal: 20,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
-  menuSectionTitle: {
+  sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1f2937',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    marginBottom: 8,
   },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
+  emptyText: {
+    color: '#6b7280',
+    fontSize: 14,
+    textAlign: 'center',
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
   },
-  menuItemLeft: {
+  hostelCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+    marginBottom: 10,
+    padding: 8,
   },
-  menuItemLabel: {
-    fontSize: 14,
+  hostelImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  hostelName: {
+    fontSize: 15,
+    fontWeight: '600',
     color: '#1f2937',
-    marginLeft: 12,
   },
-  menuItemRight: {
-    fontSize: 14,
+  hostelAddress: {
+    fontSize: 12,
     color: '#6b7280',
   },
-  logoutSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+  deleteBtn: {
+    marginLeft: 10,
+    padding: 4,
   },
   logoutButton: {
     flexDirection: 'row',
@@ -390,18 +246,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-  appInfo: {
+  menuItem: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
-  appVersion: {
-    fontSize: 12,
-    color: '#9ca3af',
-    marginBottom: 4,
-  },
-  appCopyright: {
-    fontSize: 12,
-    color: '#9ca3af',
+  menuItemLabel: {
+    fontSize: 14,
+    color: '#1f2937',
+    marginLeft: 12,
   },
 });
