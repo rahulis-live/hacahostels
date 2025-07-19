@@ -1,8 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, SafeAreaView } from 'react-native';
-import { LogOut, Trash2, HelpCircle, Shield, Camera } from 'lucide-react-native';
+import { LogOut, Trash2, HelpCircle, Shield, Camera, Key, Mail } from 'lucide-react-native';
 import { useHostels } from '@/contexts/HostelContext';
+import { useAuth } from '@/contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
+import { router } from 'expo-router';
 
 interface UserProfile {
   id: string;
@@ -22,8 +24,10 @@ const initialUser: UserProfile = {
 
 export default function ProfileScreen() {
   const { hostels, deleteHostel } = useHostels();
+  const { user, signOut, isEmailVerified, sendEmailVerification } = useAuth();
   const userHostels = hostels.filter(h => h.ownerId === initialUser.id);
   const [user, setUser] = useState<UserProfile>(initialUser);
+  const [sendingVerification, setSendingVerification] = useState(false);
 
   const handleDelete = (id: string) => {
     Alert.alert('Delete Listing', 'Are you sure you want to delete this listing?', [
@@ -49,6 +53,40 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleSignOut = async () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              router.replace('/auth/login');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleSendVerification = async () => {
+    setSendingVerification(true);
+    try {
+      await sendEmailVerification();
+      Alert.alert('Success', 'Verification email sent! Please check your inbox.');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to send verification email');
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -65,8 +103,21 @@ export default function ProfileScreen() {
               )}
             </TouchableOpacity>
             <Text style={styles.userName}>{user.name}</Text>
-            <Text style={styles.userInfo}>Student ID: {user.studentId}</Text>
-            <Text style={styles.userInfo}>{user.institute}</Text>
+            <Text style={styles.userInfo}>
+              {user?.email || 'No email available'}
+            </Text>
+            {!isEmailVerified && (
+              <TouchableOpacity
+                style={styles.verificationButton}
+                onPress={handleSendVerification}
+                disabled={sendingVerification}
+              >
+                <Mail size={16} color="#ef4444" />
+                <Text style={styles.verificationText}>
+                  {sendingVerification ? 'Sending...' : 'Verify Email'}
+                </Text>
+              </TouchableOpacity>
+            )}
             <Text style={styles.avatarHint}>Tap photo to change</Text>
           </View>
         </View>
@@ -92,7 +143,28 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton} onPress={() => Alert.alert('Logged out!')}>
+          <Text style={styles.sectionTitle}>Account Security</Text>
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/auth/change-password')}>
+            <Key size={20} color="#6b7280" />
+            <Text style={styles.menuItemLabel}>Change Password</Text>
+          </TouchableOpacity>
+          {isEmailVerified ? (
+            <View style={styles.menuItem}>
+              <Mail size={20} color="#10b981" />
+              <Text style={[styles.menuItemLabel, { color: '#10b981' }]}>Email Verified</Text>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.menuItem} onPress={handleSendVerification}>
+              <Mail size={20} color="#ef4444" />
+              <Text style={[styles.menuItemLabel, { color: '#ef4444' }]}>
+                {sendingVerification ? 'Sending Verification...' : 'Verify Email'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
             <LogOut size={20} color="#ef4444" />
             <Text style={styles.logoutText}>Log Out</Text>
           </TouchableOpacity>
@@ -167,6 +239,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6b7280',
     marginTop: 4,
+  },
+  verificationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef2f2',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginTop: 8,
+  },
+  verificationText: {
+    fontSize: 12,
+    color: '#ef4444',
+    marginLeft: 4,
+    fontWeight: '600',
   },
   userName: {
     fontSize: 20,
