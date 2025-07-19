@@ -21,13 +21,16 @@ export const app = initializeApp(firebaseConfig);
 
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-  // Add additional security configurations
-  popupRedirectResolver: undefined, // Disable popup redirects for security
 });
 
 // Connect to auth emulator in development
-if (__DEV__ && !auth._delegate._config.emulator) {
-  connectAuthEmulator(auth, 'http://localhost:9099');
+if (__DEV__) {
+  try {
+    connectAuthEmulator(auth, 'http://localhost:9099');
+  } catch (error) {
+    // Emulator already connected or not available
+    console.log('Auth emulator connection skipped:', error);
+  }
 }
 
 export const db = getFirestore(app);
