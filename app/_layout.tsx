@@ -1,7 +1,8 @@
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import { HostelProvider } from '@/contexts/HostelContext';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, loading, isEmailVerified } = useAuth();
@@ -44,6 +45,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 export default function CustomLayout() {
+  useFrameworkReady();
   return (
     <AuthProvider>
       <HostelProvider>
