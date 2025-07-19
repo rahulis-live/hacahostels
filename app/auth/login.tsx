@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/firebaseconfig';
@@ -11,6 +11,13 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // Input validation
   const validateEmail = (email: string) => {
@@ -98,7 +105,9 @@ export default function LoginScreen() {
       
       Alert.alert('Login Failed', errorMessage);
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -129,7 +138,9 @@ export default function LoginScreen() {
       
       Alert.alert('Error', errorMessage);
     } finally {
-      setResetLoading(false);
+      if (isMounted.current) {
+        setResetLoading(false);
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth } from '@/firebaseconfig';
@@ -14,6 +14,13 @@ export default function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+   const isMounted = useRef(true);
+
+   useEffect(() => {
+     return () => {
+       isMounted.current = false;
+     };
+   }, []);
 
   // Password strength validation
   const passwordRequirements = {
@@ -123,7 +130,9 @@ export default function SignupScreen() {
       
       Alert.alert('Signup Failed', errorMessage);
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
 
