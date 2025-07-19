@@ -119,7 +119,7 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             )}
             <Text style={styles.avatarHint}>Tap photo to change</Text>
-          <Text style={styles.userName}>{localUser.name}</Text>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -131,12 +131,12 @@ export default function ProfileScreen() {
               <View key={hostel.id} style={styles.hostelCard}>
                 <Image source={{ uri: hostel.image }} style={styles.hostelImage} />
                 <View style={{ flex: 1 }}>
-            {localUser.avatar ? (
-              <Image source={{ uri: localUser.avatar }} style={styles.avatarImg} />
+                  <Text style={styles.hostelName}>{hostel.name}</Text>
+                  <Text style={styles.hostelAddress}>{hostel.address}</Text>
                 </View>
                 <TouchableOpacity onPress={() => handleDelete(hostel.id)} style={styles.deleteBtn}>
                   <Trash2 size={20} color="#ef4444" />
-                <Text style={styles.avatarText}>{localUser.name.split(' ').map(n => n[0]).join('')}</Text>
+                </TouchableOpacity>
               </View>
             ))
           )}
