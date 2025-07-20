@@ -2,7 +2,7 @@ import { View, Text, Button, ActivityIndicator, StyleSheet } from "react-native"
 import { useRouter } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
 
-export default function ProfileScreen() {
+function ProfileScreen() {
   const router = useRouter();
   const { user, logout, loading } = useAuth();
 
@@ -36,6 +36,8 @@ export default function ProfileScreen() {
     </View>
   );
 }
+
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
   centered: {

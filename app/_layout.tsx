@@ -4,6 +4,7 @@ import { HostelProvider } from '@/contexts/HostelContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { useRouter, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 
 function AuthGateWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -48,7 +49,11 @@ export default function CustomLayout() {
   return (
     <HostelProvider>
       <AuthGateWrapper>
-        <Slot />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="auth" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
       </AuthGateWrapper>
     </HostelProvider>
   );

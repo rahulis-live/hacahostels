@@ -5,7 +5,7 @@ import { auth } from '@/firebaseconfig';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Check, X } from 'lucide-react-native';
 
-export default function SignupScreen() {
+function SignupScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -272,6 +272,8 @@ export default function SignupScreen() {
     </ScrollView>
   );
 }
+
+export default SignupScreen;
 
 const styles = StyleSheet.create({
   container: {
