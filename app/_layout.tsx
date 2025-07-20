@@ -8,9 +8,11 @@ import { Stack } from 'expo-router';
 
 function AuthGateWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <_AuthGate>{children}</_AuthGate>
-    </AuthProvider>
+    <HostelProvider>
+      <AuthProvider>
+        <_AuthGate>{children}</_AuthGate>
+      </AuthProvider>
+    </HostelProvider>
   );
 }
 
@@ -43,18 +45,16 @@ function _AuthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export default function CustomLayout() {
+export default function RootLayout() {
   useFrameworkReady();
 
   return (
-    <HostelProvider>
-      <AuthGateWrapper>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="auth" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </AuthGateWrapper>
-    </HostelProvider>
+    <AuthGateWrapper>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+    </AuthGateWrapper>
   );
 }

@@ -28,19 +28,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setIsEmailVerified(firebaseUser?.emailVerified ?? false);
-      setLoading(false);
+      if (isMounted) {
+        setUser(firebaseUser);
+        setIsEmailVerified(firebaseUser?.emailVerified ?? false);
+        setLoading(false);
 
-      if (firebaseUser) {
-        console.log('User authenticated:', firebaseUser.uid);
-      } else {
-        console.log('User signed out');
+        if (firebaseUser) {
+          console.log('User authenticated:', firebaseUser.uid);
+        } else {
+          console.log('User signed out');
+        }
       }
     });
 
-    return unsubscribe;
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const logout = async () => {

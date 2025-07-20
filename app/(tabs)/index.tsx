@@ -6,10 +6,7 @@ import { useEffect } from 'react';
 import { useHostels } from '@/contexts/HostelContext';
 import { Hostel } from '@/types/hostel';
 import HostelDetailModal from '@/components/HostelDetailModal';
-import { auth } from '@/firebaseconfig';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword} from 'firebase/auth';
 
-// Only this component should be exported!
 export default function HomeScreen() {
   const { hostels, toggleFavorite } = useHostels();
   const [selectedHostel, setSelectedHostel] = useState<Hostel | null>(null);
